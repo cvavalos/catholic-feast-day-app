@@ -4,18 +4,24 @@ import java.time.LocalDate;
 import java.util.List;
 
 public class FeastDay {
+    private int id;
     private LocalDate date;
     private String season;
     private int seasonWeek;
     private List<Celebration> celebrations;
     private String weekday;
 
-    public FeastDay(LocalDate date, String season, int seasonWeek, List<Celebration> celebrations, String weekday) {
+    public FeastDay(int id, LocalDate date, String season, int seasonWeek, List<Celebration> celebrations, String weekday) {
+        this.id = id;
         this.date = date;
         this.season = season;
         this.seasonWeek = seasonWeek;
         this.celebrations = celebrations;
         this.weekday = weekday;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public LocalDate getDate() {

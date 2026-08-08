@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class CalendarServer {
+    private int idCounter = 0;
+
     public HttpResponse<String> fetchData(String url) throws Exception {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).GET().build();
@@ -32,6 +34,7 @@ public class CalendarServer {
         String weekday;
 
         for (JsonNode day : root) {
+            idCounter++;
             date = LocalDate.parse(day.get("date").asText());
             season = day.get("season").asText();
             seasonWeek = day.get("season_week").asInt();
@@ -49,7 +52,7 @@ public class CalendarServer {
             }
             weekday = day.get("weekday").asText();
 
-            feastDays.add(new FeastDay(date, season, seasonWeek, celebrations, weekday));
+            feastDays.add(new FeastDay(idCounter, date, season, seasonWeek, celebrations, weekday));
         }
 
         return feastDays;
