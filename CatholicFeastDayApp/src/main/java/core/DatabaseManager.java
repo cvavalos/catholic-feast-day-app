@@ -1,4 +1,4 @@
-package main.java.core;
+package core;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -36,12 +36,12 @@ public class DatabaseManager {
             stmt.setInt(4, feastDay.getSeasonWeek());
             stmt.setString(5, feastDay.getWeekday());
 
+            stmt.executeUpdate();
+
             List<Celebration> celebrations = feastDay.getCelebrations();
             for (Celebration celebration : celebrations) {
                 insertCelebrations(celebration);
             }
-
-            stmt.executeUpdate();
         }
         catch (SQLException e) {
             throw new RuntimeException(e);
@@ -88,6 +88,7 @@ public class DatabaseManager {
                 double rank_num = 0.0;
 
                 PreparedStatement stmt2 = conn.prepareStatement("SELECT * FROM celebrations WHERE feast_day_id = ?");
+                stmt2.setInt(1, id);
                 ResultSet rs2 = stmt2.executeQuery();
                 while (rs2.next()) {
                     title = rs2.getString("title");

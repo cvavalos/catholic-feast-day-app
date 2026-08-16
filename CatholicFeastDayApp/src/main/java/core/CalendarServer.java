@@ -1,4 +1,4 @@
-package main.java.core;
+package core;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -48,7 +48,7 @@ public class CalendarServer {
                 String rank = celebration.get("rank").asText();
                 double rankNum = celebration.get("rank_num").asDouble();
 
-                celebrations.add(new Celebration(title, color, rank, rankNum));
+                celebrations.add(new Celebration(title, color, rank, rankNum, idCounter));
             }
             weekday = day.get("weekday").asText();
 
