@@ -1,9 +1,13 @@
 package app;
 import ui.CalendarController;
 import javafx.application.Application;
+
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
+
 import javafx.stage.Stage;
+
 
 public class Main extends Application {
     public static void main(String[] args) {
@@ -11,9 +15,11 @@ public class Main extends Application {
     }
 
     public void start(Stage stage) {
-        Label label = new Label ("My Liturgical Calendar");
-        Scene scene = new Scene(label, 500, 400);
+        CalendarController calendarController = new CalendarController();
 
+        BorderPane ui = calendarController.getView();
+
+        Scene scene = new Scene(ui);
 
         stage.setTitle("Liturgical Calendar");
         stage.setScene(scene);

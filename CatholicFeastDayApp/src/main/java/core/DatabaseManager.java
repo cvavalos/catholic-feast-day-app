@@ -18,7 +18,7 @@ public class DatabaseManager {
         return DriverManager.getConnection(URL);
     }
 
-    public void createTable(String query) {
+    public void runQuery(String query) {
         try (Connection conn = connect(); Statement stmt = conn.createStatement()) {
             stmt.execute(query);
         }
@@ -105,6 +105,16 @@ public class DatabaseManager {
                 return null;
 
             }
+        }
+        catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean hasFeastDays() {
+        try (Connection conn = connect(); Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT 1 FROM feast_days LIMIT 1")) {
+            return rs.next();
         }
         catch (SQLException e) {
             throw new RuntimeException(e);

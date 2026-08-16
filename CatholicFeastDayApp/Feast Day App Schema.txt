@@ -1,0 +1,19 @@
+Feast Day App Schema
+
+Feast Day
+__________
+
+id
+date
+season
+season_week
+weekday
+
+
+Celebration
+____________
+title
+color
+rank
+rank_num
+feast_day_id
