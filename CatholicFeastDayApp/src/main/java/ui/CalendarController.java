@@ -2,6 +2,7 @@ package ui;
 import core.CalendarServer;
 import core.DatabaseManager;
 import core.FeastDay;
+import core.Celebration;
 
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
@@ -19,6 +20,9 @@ import javafx.scene.control.DatePicker;
 import javafx.geometry.Pos;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.DayOfWeek;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,9 +40,20 @@ public class CalendarController {
         FeastDay todaysDay = databaseManager.selectFeastDay(LocalDate.now().toString());
 
         BorderPane root = new BorderPane();
+
+        HBox searchBar = manageSearchBar();
+        VBox feastDay = manageFeastDayBox(todaysDay);
+        GridPane grid = manageCalendar();
+
+        root.setTop(searchBar);
+        root.setLeft(grid);
+        root.setCenter(feastDay);
+
+        return root;
+    }
+
+    public HBox manageSearchBar() {
         HBox searchBar = new HBox(10);
-        VBox feastDay = new VBox(10);
-        GridPane grid = new GridPane();
 
         TextField text = new TextField();
         Button searchButton = new Button("Search");
@@ -46,16 +61,46 @@ public class CalendarController {
         searchBar.getChildren().add(searchButton);
         searchBar.setAlignment(Pos.CENTER);
 
+        return searchBar;
+    }
+
+    public VBox manageFeastDayBox(FeastDay todaysDay) {
+        VBox feastDay = new VBox(10);
+
         Label feast = new Label("Today's Feast");
         Label date = new Label(todaysDay.getDate().toString());
+        Label season = new Label(todaysDay.getSeason());
+        Label season_week = new Label(Integer.toString(todaysDay.getSeasonWeek()));
+        Label celebrationIntro = new Label("Celebrations");
+        Label weekday = new Label(todaysDay.getWeekday());
+
         feastDay.getChildren().add(feast);
         feastDay.getChildren().add(date);
+        feastDay.getChildren().add(season);
+        feastDay.getChildren().add(season_week);
+        feastDay.getChildren().add(celebrationIntro);
 
-        root.setTop(searchBar);
-        root.setLeft(grid);
-        root.setCenter(feastDay);
+        for (Celebration celebration : todaysDay.getCelebrations()) {
+            List<Label> celebrations = new ArrayList<Label>();
+            celebrations.add(new Label(celebration.getTitle()));
+            celebrations.add(new Label(celebration.getColor()));
+            celebrations.add(new Label(celebration.getRank()));
+            celebrations.add(new Label(String.valueOf(celebration.getRankNum())));
+            celebrations.add(new Label(Integer.toString(celebration.getFeast_day_id())));
 
-        return root;
+            for (Label label : celebrations) {
+                feastDay.getChildren().add(label);
+            }
+        }
+        feastDay.getChildren().add(weekday);
+
+        return feastDay;
+    }
+
+    public GridPane manageCalendar() {
+        GridPane grid = new GridPane();
+
+        return grid;
     }
 
     public List<FeastDay> fetchDataFromAPI() throws Exception {

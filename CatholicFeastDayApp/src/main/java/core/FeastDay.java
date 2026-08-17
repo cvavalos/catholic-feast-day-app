@@ -2,6 +2,7 @@ package core;
 
 import java.time.LocalDate;
 import java.util.List;
+import core.Celebration;
 
 public class FeastDay {
     private int id;
@@ -36,7 +37,7 @@ public class FeastDay {
         return seasonWeek;
     }
 
-    public List<Celebration> getCelebrations() {
+    public List<core.Celebration> getCelebrations() {
         return celebrations;
     }
 
