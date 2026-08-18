@@ -12,10 +12,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.DatePicker;
 
 import javafx.geometry.Pos;
 
@@ -30,7 +26,10 @@ import java.util.List;
 public class CalendarController {
     int displayedYear = LocalDate.now().getYear();
     Month displayedMonth = LocalDate.now().getMonth();
-    DayOfWeek displayedDay = LocalDate.now().getDayOfWeek();
+    DayOfWeek displayedDayOfWeek = LocalDate.now().getDayOfWeek();
+    LocalDate displayedDay = LocalDate.now();
+    VBox gridHolder;
+    HBox navigationBar;
 
     public BorderPane getView() {
         try {
@@ -48,11 +47,11 @@ public class CalendarController {
 
         HBox searchBar = manageSearchBar();
         VBox feastDay = manageFeastDayBox(todaysDay);
-        GridPane grid = manageCalendar();
+        GridPane grid = manageCalendar(LocalDate.now().getYear(), LocalDate.now().getMonth());
 
         VBox calendar = new VBox();
-        HBox navigationBar = manageNavigationBar();
-        VBox gridHolder = new VBox();
+        navigationBar = manageNavigationBar(getMonth(LocalDate.now().getMonth()));
+        gridHolder = new VBox();
 
         calendar.getChildren().add(navigationBar);
         calendar.getChildren().add(gridHolder);
@@ -111,15 +110,15 @@ public class CalendarController {
         return feastDay;
     }
 
-    public GridPane manageCalendar() {
+    public GridPane manageCalendar(int year, Month month) {
         GridPane grid = new GridPane();
 
-        displayedYear = LocalDate.now().getYear();
-        displayedMonth = LocalDate.now().getMonth();
+        displayedYear = year;
+        displayedMonth = month;
         int day = 1;
 
-        YearMonth month = YearMonth.of(displayedYear, displayedMonth);
-        int daysInMonth = month.lengthOfMonth();
+        YearMonth thisMonth = YearMonth.of(displayedYear, displayedMonth);
+        int daysInMonth = thisMonth.lengthOfMonth();
         int row = 0;
         int rowTracker = getDayOfWeekNum(LocalDate.of(displayedYear, displayedMonth, day).getDayOfWeek());
 
@@ -142,20 +141,73 @@ public class CalendarController {
         return grid;
     }
 
-    public HBox manageNavigationBar() {
-        HBox navigationBar = new HBox();
-        Button leftMonthNavigator;
-        Button rightMonthNavigator;
-        Button leftDayNavigator;
-        Button rightDayNavigator;
+    public HBox manageNavigationBar(String monthToDisplay) {
+        HBox navigation = new HBox();
 
-        String monthToDisplay = getMonth(displayedMonth);
+        Button leftMonthNavigator = manageLeftMonthNavigator();
+        Button rightMonthNavigator = manageRightMonthNavigator();
+        Button leftDayNavigator = manageLeftDayNavigator();
+        Button rightDayNavigator = manageRightDayNavigator();
 
         Label month = new Label(monthToDisplay + " " + Integer.toString(displayedYear));
 
-        navigationBar.getChildren().add(month);
+        navigation.getChildren().add(leftMonthNavigator);
+        navigation.getChildren().add(leftDayNavigator);
+        navigation.getChildren().add(month);
+        navigation.getChildren().add(rightDayNavigator);
+        navigation.getChildren().add(rightMonthNavigator);
 
-        return navigationBar;
+        return navigation;
+    }
+
+    public Button manageLeftMonthNavigator() {
+        Button leftMonthNavigator = new Button("<");
+
+        leftMonthNavigator.setOnAction(event -> {
+            displayedMonth = displayedMonth.minus(1);
+
+            gridHolder.getChildren().clear();
+            gridHolder.getChildren().add(manageCalendar(displayedYear, displayedMonth));
+            navigationBar.getChildren().clear();
+            navigationBar.getChildren().add(manageNavigationBar(getMonth(displayedMonth)));
+        });
+
+        return leftMonthNavigator;
+    }
+
+    public Button manageRightMonthNavigator() {
+        Button rightMonthNavigator = new Button(">");
+
+        rightMonthNavigator.setOnAction(event -> {
+            displayedMonth = displayedMonth.plus(1);
+
+            gridHolder.getChildren().clear();
+            gridHolder.getChildren().add(manageCalendar(displayedYear, displayedMonth));
+            navigationBar.getChildren().clear();
+            navigationBar.getChildren().add(manageNavigationBar(getMonth(displayedMonth)));
+        });
+
+        return rightMonthNavigator;
+    }
+
+    public Button manageLeftDayNavigator() {
+        Button leftDayNavigator = new Button("<<");
+
+        leftDayNavigator.setOnAction(event -> {
+            displayedDay = displayedDay.minusDays(1);
+        });
+
+        return leftDayNavigator;
+    }
+
+    public Button manageRightDayNavigator() {
+        Button rightDayNavigator = new Button(">>");
+
+        rightDayNavigator.setOnAction(event -> {
+            displayedDay = displayedDay.plusDays(1);
+        });
+
+        return rightDayNavigator;
     }
 
     public String getMonth(Month month) {
