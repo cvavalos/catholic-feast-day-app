@@ -20,6 +20,7 @@ import javafx.scene.control.DatePicker;
 import javafx.geometry.Pos;
 
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.YearMonth;
 import java.time.DayOfWeek;
 
@@ -27,6 +28,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CalendarController {
+    int displayedYear = LocalDate.now().getYear();
+    Month displayedMonth = LocalDate.now().getMonth();
+    DayOfWeek displayedDay = LocalDate.now().getDayOfWeek();
+
     public BorderPane getView() {
         try {
             controlDatabase();
@@ -45,8 +50,17 @@ public class CalendarController {
         VBox feastDay = manageFeastDayBox(todaysDay);
         GridPane grid = manageCalendar();
 
+        VBox calendar = new VBox();
+        HBox navigationBar = manageNavigationBar();
+        VBox gridHolder = new VBox();
+
+        calendar.getChildren().add(navigationBar);
+        calendar.getChildren().add(gridHolder);
+
+        gridHolder.getChildren().add(grid);
+
         root.setTop(searchBar);
-        root.setLeft(grid);
+        root.setLeft(calendar);
         root.setCenter(feastDay);
 
         return root;
@@ -100,7 +114,100 @@ public class CalendarController {
     public GridPane manageCalendar() {
         GridPane grid = new GridPane();
 
+        displayedYear = LocalDate.now().getYear();
+        displayedMonth = LocalDate.now().getMonth();
+        int day = 1;
+
+        YearMonth month = YearMonth.of(displayedYear, displayedMonth);
+        int daysInMonth = month.lengthOfMonth();
+        int row = 0;
+        int rowTracker = getDayOfWeekNum(LocalDate.of(displayedYear, displayedMonth, day).getDayOfWeek());
+
+        for (int i = 0; i < daysInMonth; i++) {
+            LocalDate date = LocalDate.of(displayedYear, displayedMonth, day);
+            DayOfWeek dayOfWeek = date.getDayOfWeek();
+            int dayOfWeekNum = getDayOfWeekNum(dayOfWeek);
+
+            if (rowTracker > 6) {
+                row++;
+                rowTracker = 0;
+            }
+
+            Label label = new Label(String.valueOf(day));
+            grid.add(label, dayOfWeekNum, row);
+           rowTracker++;
+           day++;
+        }
+
         return grid;
+    }
+
+    public HBox manageNavigationBar() {
+        HBox navigationBar = new HBox();
+        Button leftMonthNavigator;
+        Button rightMonthNavigator;
+        Button leftDayNavigator;
+        Button rightDayNavigator;
+
+        String monthToDisplay = getMonth(displayedMonth);
+
+        Label month = new Label(monthToDisplay + " " + Integer.toString(displayedYear));
+
+        navigationBar.getChildren().add(month);
+
+        return navigationBar;
+    }
+
+    public String getMonth(Month month) {
+        switch (month) {
+            case JANUARY:
+                return "January";
+            case FEBRUARY:
+                return "February";
+            case MARCH:
+                return "March";
+            case APRIL:
+                return "April";
+            case MAY:
+                return "May";
+            case JUNE:
+                return "June";
+            case JULY:
+                return "July";
+            case AUGUST:
+                return "August";
+            case SEPTEMBER:
+                return "September";
+            case OCTOBER:
+                return "October";
+            case NOVEMBER:
+                return "November";
+            case DECEMBER:
+                return "December";
+            default:
+                return "null";
+        }
+    }
+
+    public int getDayOfWeekNum(DayOfWeek dayOfWeek) {
+        switch (dayOfWeek) {
+            case SUNDAY:
+                return 0;
+            case MONDAY:
+                return 1;
+            case TUESDAY:
+                return 2;
+            case WEDNESDAY:
+                return 3;
+            case THURSDAY:
+                return 4;
+            case FRIDAY:
+                return 5;
+            case SATURDAY:
+                return 6;
+            default:
+                return 7;
+        }
     }
 
     public List<FeastDay> fetchDataFromAPI() throws Exception {
