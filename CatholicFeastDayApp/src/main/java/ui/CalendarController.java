@@ -8,14 +8,27 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Border;
+import javafx.scene.layout.BorderStroke;
+import javafx.scene.layout.BorderStrokeStyle;
+import javafx.scene.layout.BorderWidths;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.Priority;
 
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 
+import javafx.scene.paint.Color;
+
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+
 import javafx.geometry.Pos;
+import javafx.geometry.Insets;
 
 import java.time.LocalDate;
+import java.time.Year;
 import java.time.Month;
 import java.time.YearMonth;
 import java.time.DayOfWeek;
@@ -24,11 +37,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CalendarController {
-    int displayedYear = LocalDate.now().getYear();
+    Year displayedYear = Year.now();
     Month displayedMonth = LocalDate.now().getMonth();
     DayOfWeek displayedDayOfWeek = LocalDate.now().getDayOfWeek();
     LocalDate displayedDay = LocalDate.now();
     VBox gridHolder;
+    VBox feastDayBox;
     HBox navigationBar;
 
     public BorderPane getView() {
@@ -46,39 +60,52 @@ public class CalendarController {
         BorderPane root = new BorderPane();
 
         HBox searchBar = manageSearchBar();
-        VBox feastDay = manageFeastDayBox(todaysDay);
-        GridPane grid = manageCalendar(LocalDate.now().getYear(), LocalDate.now().getMonth());
+        feastDayBox = manageFeastDayBox(todaysDay);
+        GridPane grid = manageCalendar(Year.now(), LocalDate.now().getMonth());
 
         VBox calendar = new VBox();
-        navigationBar = manageNavigationBar(getMonth(LocalDate.now().getMonth()));
+        Border calendarBorder = new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY,
+                BorderWidths.DEFAULT));
+
+        navigationBar = manageNavigationBar(Year.now().toString(), getMonth(LocalDate.now().getMonth()));
         gridHolder = new VBox();
 
         calendar.getChildren().add(navigationBar);
         calendar.getChildren().add(gridHolder);
+        calendar.setBorder(calendarBorder);
 
         gridHolder.getChildren().add(grid);
 
         root.setTop(searchBar);
         root.setLeft(calendar);
-        root.setCenter(feastDay);
+        root.setCenter(feastDayBox);
 
         return root;
     }
 
     public HBox manageSearchBar() {
         HBox searchBar = new HBox(10);
+        Border searchBarBorder = new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY,
+                BorderWidths.DEFAULT));
 
+        Label searchLabel = new Label("Search by date (ex.: 2026-08-26)");
         TextField text = new TextField();
-        Button searchButton = new Button("Search");
+
+        Button searchButton = manageSearchButton(text);
+
+        searchBar.getChildren().add(searchLabel);
         searchBar.getChildren().add(text);
         searchBar.getChildren().add(searchButton);
         searchBar.setAlignment(Pos.CENTER);
+        searchBar.setBorder(searchBarBorder);
 
         return searchBar;
     }
 
     public VBox manageFeastDayBox(FeastDay todaysDay) {
         VBox feastDay = new VBox(10);
+        Border feastDayBoxBorder = new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY,
+                BorderWidths.DEFAULT));
 
         Label feast = new Label("Today's Feast");
         Label date = new Label(todaysDay.getDate().toString());
@@ -106,24 +133,28 @@ public class CalendarController {
             }
         }
         feastDay.getChildren().add(weekday);
+        feastDay.setBorder(feastDayBoxBorder);
 
         return feastDay;
     }
 
-    public GridPane manageCalendar(int year, Month month) {
+    public GridPane manageCalendar(Year year, Month month) {
         GridPane grid = new GridPane();
+        Border gridBorder = new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY,
+                BorderWidths.DEFAULT));
 
         displayedYear = year;
+        int thisYear = year.getValue();
         displayedMonth = month;
         int day = 1;
 
-        YearMonth thisMonth = YearMonth.of(displayedYear, displayedMonth);
+        YearMonth thisMonth = YearMonth.of(thisYear, displayedMonth);
         int daysInMonth = thisMonth.lengthOfMonth();
         int row = 0;
-        int rowTracker = getDayOfWeekNum(LocalDate.of(displayedYear, displayedMonth, day).getDayOfWeek());
+        int rowTracker = getDayOfWeekNum(LocalDate.of(thisYear, displayedMonth, day).getDayOfWeek());
 
         for (int i = 0; i < daysInMonth; i++) {
-            LocalDate date = LocalDate.of(displayedYear, displayedMonth, day);
+            LocalDate date = LocalDate.of(thisYear, displayedMonth, day);
             DayOfWeek dayOfWeek = date.getDayOfWeek();
             int dayOfWeekNum = getDayOfWeekNum(dayOfWeek);
 
@@ -132,30 +163,42 @@ public class CalendarController {
                 rowTracker = 0;
             }
 
-            Label label = new Label(String.valueOf(day));
-            grid.add(label, dayOfWeekNum, row);
-           rowTracker++;
-           day++;
+            Button button = manageDayButton(String.valueOf(day), date.toString(), date);
+
+            button.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+            button.setBorder(gridBorder);
+
+            grid.setHgrow(button, Priority.ALWAYS);
+            grid.setVgrow(button, Priority.ALWAYS);
+
+            grid.add(button, dayOfWeekNum, row);
+            rowTracker++;
+            day++;
         }
+
+        grid.setBorder(gridBorder);
 
         return grid;
     }
 
-    public HBox manageNavigationBar(String monthToDisplay) {
+    public HBox manageNavigationBar(String year, String monthToDisplay) {
         HBox navigation = new HBox();
+        Border navigationBarBorder = new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY,
+                BorderWidths.DEFAULT));
 
         Button leftMonthNavigator = manageLeftMonthNavigator();
         Button rightMonthNavigator = manageRightMonthNavigator();
         Button leftDayNavigator = manageLeftDayNavigator();
         Button rightDayNavigator = manageRightDayNavigator();
 
-        Label month = new Label(monthToDisplay + " " + Integer.toString(displayedYear));
+        Label month = new Label(monthToDisplay + " " + year);
 
         navigation.getChildren().add(leftMonthNavigator);
         navigation.getChildren().add(leftDayNavigator);
         navigation.getChildren().add(month);
         navigation.getChildren().add(rightDayNavigator);
         navigation.getChildren().add(rightMonthNavigator);
+        navigation.setBorder(navigationBarBorder);
 
         return navigation;
     }
@@ -164,12 +207,15 @@ public class CalendarController {
         Button leftMonthNavigator = new Button("<");
 
         leftMonthNavigator.setOnAction(event -> {
+            if (displayedMonth == Month.JANUARY) {
+                displayedYear = displayedYear.minusYears(1);
+            }
             displayedMonth = displayedMonth.minus(1);
 
             gridHolder.getChildren().clear();
             gridHolder.getChildren().add(manageCalendar(displayedYear, displayedMonth));
             navigationBar.getChildren().clear();
-            navigationBar.getChildren().add(manageNavigationBar(getMonth(displayedMonth)));
+            navigationBar.getChildren().add(manageNavigationBar(displayedYear.toString(), getMonth(displayedMonth)));
         });
 
         return leftMonthNavigator;
@@ -179,12 +225,15 @@ public class CalendarController {
         Button rightMonthNavigator = new Button(">");
 
         rightMonthNavigator.setOnAction(event -> {
+            if (displayedMonth == Month.DECEMBER) {
+                displayedYear = displayedYear.plusYears(1);
+            }
             displayedMonth = displayedMonth.plus(1);
 
             gridHolder.getChildren().clear();
             gridHolder.getChildren().add(manageCalendar(displayedYear, displayedMonth));
             navigationBar.getChildren().clear();
-            navigationBar.getChildren().add(manageNavigationBar(getMonth(displayedMonth)));
+            navigationBar.getChildren().add(manageNavigationBar(displayedYear.toString(), getMonth(displayedMonth)));
         });
 
         return rightMonthNavigator;
@@ -195,6 +244,12 @@ public class CalendarController {
 
         leftDayNavigator.setOnAction(event -> {
             displayedDay = displayedDay.minusDays(1);
+
+            displayedMonth = displayedDay.getMonth();
+            displayedYear = Year.of(displayedDay.getYear());
+
+            navigationBar.getChildren().clear();
+            navigationBar.getChildren().add(manageNavigationBar(displayedYear.toString(), getMonth(displayedMonth)));
         });
 
         return leftDayNavigator;
@@ -205,9 +260,50 @@ public class CalendarController {
 
         rightDayNavigator.setOnAction(event -> {
             displayedDay = displayedDay.plusDays(1);
+
+            displayedMonth = displayedDay.getMonth();
+            displayedYear = Year.of(displayedDay.getYear());
+
+            navigationBar.getChildren().clear();
+            navigationBar.getChildren().add(manageNavigationBar(displayedYear.toString(), getMonth(displayedMonth)));
         });
 
         return rightDayNavigator;
+    }
+
+    public Button manageDayButton(String day, String date, LocalDate dateSelected) {
+        Button dayButton = new Button(day);
+        DatabaseManager databaseManager = new DatabaseManager();
+
+        dayButton.setOnAction(event -> {
+            FeastDay selectedDay = databaseManager.selectFeastDay(date);
+            displayedYear = Year.of(dateSelected.getYear());
+            displayedMonth = dateSelected.getMonth();
+            displayedDay = dateSelected;
+
+            feastDayBox.getChildren().clear();
+            feastDayBox.getChildren().add(manageFeastDayBox(selectedDay));
+        });
+
+        return dayButton;
+    }
+
+    public Button manageSearchButton(TextField text) {
+        Button searchButton = new Button("Search");
+        DatabaseManager databaseManager = new DatabaseManager();
+
+        searchButton.setOnAction(event -> {
+            String input = text.getText();
+            FeastDay selectedDay = databaseManager.selectFeastDay(input);
+            /*displayedYear = Year.of(dateSelected.getYear());
+            displayedMonth = dateSelected.getMonth();
+            displayedDay = dateSelected;*/
+
+            feastDayBox.getChildren().clear();
+            feastDayBox.getChildren().add(manageFeastDayBox(selectedDay));
+        });
+
+        return searchButton;
     }
 
     public String getMonth(Month month) {
