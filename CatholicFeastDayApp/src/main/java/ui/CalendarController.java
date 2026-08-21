@@ -35,6 +35,7 @@ import java.time.DayOfWeek;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
 
 public class CalendarController {
     Year displayedYear = Year.now();
@@ -108,11 +109,24 @@ public class CalendarController {
                 BorderWidths.DEFAULT));
 
         Label feast = new Label("Today's Feast");
-        Label date = new Label(todaysDay.getDate().toString());
-        Label season = new Label(todaysDay.getSeason());
-        Label season_week = new Label(Integer.toString(todaysDay.getSeasonWeek()));
+        feast.setFont(Font.font("Bookman Old Style", FontWeight.BOLD, 30));
+        feast.setMaxWidth(Double.MAX_VALUE);
+        feast.setAlignment(Pos.TOP_CENTER);
+
+        Label date = new Label("Date: " + todaysDay.getDate().toString());
+        date.setFont(Font.font("Bookman Old Style", 15));
+
+        Label season = new Label("Season: " + todaysDay.getSeason());
+        season.setFont(Font.font("Bookman Old Style", 15));
+
+        Label season_week = new Label("Season Week: " + Integer.toString(todaysDay.getSeasonWeek()));
+        season_week.setFont(Font.font("Bookman Old Style", 15));
+
         Label celebrationIntro = new Label("Celebrations");
-        Label weekday = new Label(todaysDay.getWeekday());
+        celebrationIntro.setFont(Font.font("Bookman Old Style", FontWeight.BOLD, 20));
+
+        Label weekday = new Label("Day of the Week: " + todaysDay.getWeekday());
+        weekday.setFont(Font.font("Bookman Old Style", 15));
 
         feastDay.getChildren().add(feast);
         feastDay.getChildren().add(date);
@@ -122,17 +136,26 @@ public class CalendarController {
 
         for (Celebration celebration : todaysDay.getCelebrations()) {
             List<Label> celebrations = new ArrayList<Label>();
-            celebrations.add(new Label(celebration.getTitle()));
-            celebrations.add(new Label(celebration.getColor()));
-            celebrations.add(new Label(celebration.getRank()));
-            celebrations.add(new Label(String.valueOf(celebration.getRankNum())));
-            celebrations.add(new Label(Integer.toString(celebration.getFeast_day_id())));
+            Label nameLabel = new Label("  - Name: " + celebration.getTitle());
+            nameLabel.setFont(Font.font("Bookman Old Style", 15));
+
+            Label colorLabel = new Label("  - Color: " + celebration.getColor());
+            colorLabel.setFont(Font.font("Bookman Old Style", 15));
+
+            Label rankLabel = new Label("  - Rank: " + celebration.getRank());
+            rankLabel.setFont(Font.font("Bookman Old Style", 15));
+
+            Label rankNumLabel = new Label("  - Rank Number: " + String.valueOf(celebration.getRankNum()));
+            rankNumLabel.setFont(Font.font("Bookman Old Style", 15));
+
+            celebrations.addAll(Arrays.asList(nameLabel, colorLabel, rankLabel, rankNumLabel));
 
             for (Label label : celebrations) {
                 feastDay.getChildren().add(label);
             }
         }
         feastDay.getChildren().add(weekday);
+        feastDay.setSpacing(20);
         feastDay.setBorder(feastDayBoxBorder);
 
         return feastDay;
